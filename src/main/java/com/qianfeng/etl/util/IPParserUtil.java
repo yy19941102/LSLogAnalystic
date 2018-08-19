@@ -5,13 +5,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
- * @Auther: lyd
+ * @Auther: maomao
  * @Date: 2018/8/15 16:01
  * @Description:ip解析工具类
  */
 public class IPParserUtil extends IPSeeker{
     private static final Logger logger = Logger.getLogger(IPParserUtil.class);
 
+    // 创建区域信息对象
     RegionInfo info = new RegionInfo();
 
     /**
@@ -26,18 +27,18 @@ public class IPParserUtil extends IPSeeker{
         }
 
         try{
-            //通过ipSeekeer来获取ip所对应的信息  贵州省铜仁地区| 局域网
+            //通过ipSeeker来获取ip所对应的信息  贵州省铜仁地区| 局域网
             String country = IPSeeker.getInstance().getCountry(ip);
             if(country.equals("局域网")){
                 info.setCountry("中国");
                 info.setProvince("北京市");
                 info.setCity("昌平区");
             } else if(country != null && !country.trim().isEmpty()){
-                //查找返回的字符串中是否有省
+                // 查找返回的字符串中是否有省
                 int index = country.indexOf("省");
                 info.setCountry("中国");
                 if(index > 0){
-                    //证明有省份
+                    // 证明有省份
                     info.setProvince(country.substring(0,index+1));
                     //查找是否有市
                     int index2 = country.indexOf("市");

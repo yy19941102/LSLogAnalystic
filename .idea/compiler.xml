@@ -9,8 +9,5 @@
         <module name="LSLogAnalystic" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="LSLogAnalystic" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

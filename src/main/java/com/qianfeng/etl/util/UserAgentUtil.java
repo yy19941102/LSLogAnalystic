@@ -2,14 +2,13 @@ package com.qianfeng.etl.util;
 
 import cz.mallat.uasparser.OnlineUpdater;
 import cz.mallat.uasparser.UASparser;
-import cz.mallat.uasparser.UserAgentInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
 /**
- * @Auther: lyd
+ * @Auther: maomao
  * @Date: 2018/8/15 16:49
  * @Description:解析useragent代理对象
  */
