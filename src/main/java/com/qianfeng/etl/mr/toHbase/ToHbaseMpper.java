@@ -47,7 +47,7 @@ public class ToHbaseMpper extends Mapper<Object, Text, NullWritable, Put> {
                 case LAUNCH:
                 case EVENT:
                 case PAGEVIEW:
-                case CHARGEQUEST:
+                case CHARGEREQUEST:
                 case CHARGEREFUND:
                 case CHARGESUCCESS:
                     // 处理存储

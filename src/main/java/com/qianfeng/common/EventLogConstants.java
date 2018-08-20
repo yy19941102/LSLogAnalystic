@@ -11,7 +11,7 @@ public class EventLogConstants {
     public static enum EventEnum {
         LAUNCH(1, "launch event", "e_l"), // 开始事件
         PAGEVIEW(2, "page view event", "e_pv"), // 网页浏览事件
-        CHARGEQUEST(3, "charge request event", "e_crt"), // 提交订单事件
+        CHARGEREQUEST(3, "charge request event", "e_crt"), // 提交订单事件
         CHARGESUCCESS(4, "charge success event", "e_cs"), // 订单提交成功事件
         CHARGEREFUND(5, "charge refund event", "e_cr"), // 订单退回事件
         EVENT(6, "event", "e_e");

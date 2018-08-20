@@ -27,7 +27,7 @@ public class LogUtil {
         // 判断log是否为空
         if (StringUtils.isNotEmpty(log.trim())) {
             //拆分单行日志
-            String[] fields = log.split(EventLogConstants.LOG_SPARTOR);
+            String[] fields = log.split(EventLogConstants.LOG_SPARTOR); // 采用"^A"进行切分
             if (fields.length == 4) {
                 //存储数据到info中
                 info.put(EventLogConstants.EVENT_COLUMN_NAME_IP, fields[0]);
