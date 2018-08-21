@@ -47,9 +47,7 @@ public class LogUtil {
                 info.clear();
             }
         }
-
-
-        return null;
+        return info;
     }
 
     /**
@@ -67,8 +65,20 @@ public class LogUtil {
         }
     }
 
+    /**
+     * 解析ip后存储到info中
+     * @param info
+     */
     private static void handleIp(Map<String, String> info) {
-
+        String ip = info.get(EventLogConstants.EVENT_COLUMN_NAME_IP);
+        if (StringUtils.isNotEmpty(ip)){
+            IPParserUtil.RegionInfo regionInfo = new IPParserUtil().parserIp(ip);
+            if (regionInfo!=null){
+                info.put(EventLogConstants.EVENT_COLUMN_NAME_COUNTRY,regionInfo.getCountry());
+                info.put(EventLogConstants.EVENT_COLUMN_NAME_PROVINCE,regionInfo.getProvince());
+                info.put(EventLogConstants.EVENT_COLUMN_NAME_CITY,regionInfo.getCity());
+            }
+        }
     }
 
     /**

@@ -1,15 +1,21 @@
 package com.qianfeng.etl.util;
 
+import com.alibaba.fastjson.JSONObject;
 import com.qianfeng.etl.util.ip.IPSeeker;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
  * @Auther: maomao
  * @Date: 2018/8/15 16:01
- * @Description:ip解析工具类
+ * @Description:ip解析工具类 如果ip为null，则返回null
+ * 如果ip是国外ip，则直接显示国家即可
+ * 如果ip是国内，则直接显示国家、省、市
  */
-public class IPParserUtil extends IPSeeker{
+public class IPParserUtil extends IPSeeker {
     private static final Logger logger = Logger.getLogger(IPParserUtil.class);
 
     // 创建区域信息对象
@@ -17,45 +23,46 @@ public class IPParserUtil extends IPSeeker{
 
     /**
      * 用于解析ip
+     *
      * @param ip
-     * @return  对于没有解析出来的字段，默认为unknown
+     * @return 对于没有解析出来的字段，默认为unknown
      */
-    public RegionInfo parserIp(String ip){
-        if(StringUtils.isEmpty(ip)){
+    public RegionInfo parserIp(String ip) {
+        if (StringUtils.isEmpty(ip)) {
             logger.warn("解析的ip为空.");
             return info;
         }
 
-        try{
+        try {
             //通过ipSeeker来获取ip所对应的信息  贵州省铜仁地区| 局域网
             String country = IPSeeker.getInstance().getCountry(ip);
-            if(country.equals("局域网")){
+            if (country.equals("局域网")) {
                 info.setCountry("中国");
                 info.setProvince("北京市");
                 info.setCity("昌平区");
-            } else if(country != null && !country.trim().isEmpty()){
+            } else if (country != null && !country.trim().isEmpty()) {
                 // 查找返回的字符串中是否有省
                 int index = country.indexOf("省");
                 info.setCountry("中国");
-                if(index > 0){
+                if (index > 0) {
                     // 证明有省份
-                    info.setProvince(country.substring(0,index+1));
+                    info.setProvince(country.substring(0, index + 1));
                     //查找是否有市
                     int index2 = country.indexOf("市");
-                    if(index2 > 0){
-                        info.setCity(country.substring(index+1,index2+1));
+                    if (index2 > 0) {
+                        info.setCity(country.substring(index + 1, index2 + 1));
                     }
                 } else {
                     //查找不到省
-                    String flag = country.substring(0,2);
-                    switch (flag){
+                    String flag = country.substring(0, 2);
+                    switch (flag) {
                         case "内蒙":
                             //设置省份
-                            info.setProvince(flag+"古");
+                            info.setProvince(flag + "古");
                             country.substring(3);
                             index = country.indexOf("市");
-                            if(index > 0){
-                                info.setCity(country.substring(0,index+1));
+                            if (index > 0) {
+                                info.setCity(country.substring(0, index + 1));
                             }
                             break;
 
@@ -67,8 +74,8 @@ public class IPParserUtil extends IPSeeker{
                             info.setProvince(flag);
                             country.substring(2);
                             index = country.indexOf("市");
-                            if(index > 0){
-                                info.setCity(country.substring(0,index+1));
+                            if (index > 0) {
+                                info.setCity(country.substring(0, index + 1));
                             }
                             break;
 
@@ -76,26 +83,26 @@ public class IPParserUtil extends IPSeeker{
                         case "上海":
                         case "重庆":
                         case "天津":
-                            info.setProvince(flag+"市");
+                            info.setProvince(flag + "市");
                             country.substring(2);
                             index = country.indexOf("区");
-                            if(index > 0){
-                                char ch = country.charAt(index-1);
-                                if(ch != '小' || ch != '校' || ch != '军'){
-                                    info.setCity(country.substring(0,index+1));
+                            if (index > 0) {
+                                char ch = country.charAt(index - 1);
+                                if (ch != '小' || ch != '校' || ch != '军') {
+                                    info.setCity(country.substring(0, index + 1));
                                 }
                             }
 
                             index = country.indexOf("县");
-                            if(index > 0){
-                                info.setCity(country.substring(0,index+1));
+                            if (index > 0) {
+                                info.setCity(country.substring(0, index + 1));
                             }
                             break;
 
                         case "香港":
                         case "澳门":
                         case "台湾":
-                            info.setProvince(flag+"特别行政区");
+                            info.setProvince(flag + "特别行政区");
                             break;
 
                         default:
@@ -104,22 +111,66 @@ public class IPParserUtil extends IPSeeker{
 
                 }
             }
-        } catch (Exception e){
-            logger.warn("解析ip异常.",e);
+        } catch (Exception e) {
+            logger.warn("解析ip异常.", e);
         }
+        return info;
+    }
+
+    /**
+     * 使用淘宝的ip解析库解析ip
+     *
+     * @param url
+     * @param charset
+     * @return
+     */
+    public RegionInfo parserIp1(String url, String charset) throws Exception {
+        RegionInfo info = new RegionInfo();
+        HttpClient client = new HttpClient();
+        GetMethod method = new GetMethod(url);
+
+        if (null == url || !url.startsWith("http")) {
+            throw new Exception("请求地址格式不对");
+        }
+        // 设置请求的编码方式
+        if (null != charset) {
+            method.addRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
+        } else {
+            method.addRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=" + "utf-8");
+        }
+        int statusCode = client.executeMethod(method);
+
+        // 打印服务器返回的状态
+        if (statusCode != HttpStatus.SC_OK) {
+            System.out.println("Method failed: " + method.getStatusLine());
+        }
+        // 返回响应消息
+        byte[] responseBody = method.getResponseBodyAsString().getBytes(method.getResponseCharSet());
+        // 在返回响应消息使用编码utf-8或gb2312
+        String response = new String(responseBody, "utf-8");
+
+        JSONObject jo = JSONObject.parseObject(response);
+        JSONObject j = (JSONObject) jo.get("data");
+
+        // 释放连接
+        method.releaseConnection();
+        // 设置省市
+        info.setCountry(j.get("country").toString());
+        info.setProvince(j.get("region").toString());
+        info.setCity(j.get("city").toString() + "市");
         return info;
     }
 
     /**
      * 用于封装ip解析出来的国家、省、市信息
      */
-    public static class RegionInfo{
+    public static class RegionInfo {
         private static final String DEFAULT_VALUE = "unknown";
         private String country = DEFAULT_VALUE; //国家
         private String province = DEFAULT_VALUE; //省
         private String city = DEFAULT_VALUE; //市
 
-        public RegionInfo(){
+        public RegionInfo() {
 
         }
 
